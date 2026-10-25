@@ -1,7 +1,24 @@
 import {unzip} from 'fflate';
 const sources=new Map();
 let db;
-export const imageUrl=c=>sources.get(c.id)||`/images/${c.id}.webp`;
+// Repository PNGs take precedence over older images imported in this browser.
+export const imageUrl=c=>c.image||sources.get(c.id)||`/images/${c.id}.webp`;
+export function setCharacterImage(element,character,{onLoad=()=>{},onMissing=()=>{element.hidden=true;}}={}){
+ const candidates=[character.image,sources.get(character.id),`/images/${character.id}.webp`].filter(Boolean);
+ let index=0;
+ element.decoding='async';
+ const loaded=()=>{element.hidden=false;element.dataset.imageLoaded='true';onLoad();};
+ const failed=()=>{index++;if(index<candidates.length)element.src=candidates[index];else{delete element.dataset.imageLoaded;onMissing();}};
+ element.addEventListener('load',loaded);element.addEventListener('error',failed);
+ element.src=candidates[0];
+ return ()=>{element.removeEventListener('load',loaded);element.removeEventListener('error',failed);};
+}
+export function bindCharacterImages(root,characters){
+ root.querySelectorAll('img[data-character-image]').forEach(element=>{
+  const character=characters.find(c=>c.id===element.dataset.characterImage);
+  if(character)setCharacterImage(element,character);
+ });
+}
 async function database(){if(db)return db;db=await new Promise((resolve,reject)=>{const request=indexedDB.open('vtuber-art',1);request.onupgradeneeded=()=>request.result.createObjectStore('portraits');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});return db;}
 export async function restoreImages(){try{const databaseHandle=await database();const rows=await new Promise((resolve,reject)=>{const tx=databaseHandle.transaction('portraits'),store=tx.objectStore('portraits'),request=store.getAll(),keys=store.getAllKeys();tx.oncomplete=()=>resolve(keys.result.map((key,i)=>[key,request.result[i]]));tx.onerror=()=>reject(tx.error);});for(const [id,blob] of rows)sources.set(id,URL.createObjectURL(blob));}catch{/* File-based portraits remain available without browser storage. */}}
 export async function saveImages(entries){const databaseHandle=await database();await new Promise((resolve,reject)=>{const tx=databaseHandle.transaction('portraits','readwrite');for(const [id,blob] of entries)tx.objectStore('portraits').put(blob,id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});for(const [id,blob] of entries){if(sources.has(id))URL.revokeObjectURL(sources.get(id));sources.set(id,URL.createObjectURL(blob));}}
