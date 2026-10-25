@@ -43,3 +43,15 @@ Puedes sustituir las cinco miniaturas provisionales añadiendo `gabu.webp`, `ant
 - Es una demo local: no tiene cuentas, servidor, pagos ni protección contra editar el guardado.
 
 La interfaz usa fuentes de Google con alternativas locales si no hay conexión. Los modelos reales deben verificarse al subirlos; no se incluyen en el repositorio.
+
+## Sonidos e invocación 3D
+
+La invocación tiene un portal y estelas 3D de Three.js, con colores azul, violeta o dorado según la rareza más alta de la tirada. Puedes saltar la animación o pasar directamente al resumen; los premios ya están guardados. La revelación usa retratos, estrellas animadas y un destello para personajes de 5 estrellas. Los materiales son objetos 3D que reaccionan al cursor. Los modelos VRM tienen entrada, respiración, movimiento de cabeza y parpadeo procedurales. No se incluyen recursos ni audio extraídos de Genshin Impact.
+
+Los sonidos se sintetizan con Web Audio tras una interacción. Usa el botón de sonido y el control de volumen (visible en escritorio); la preferencia se conserva. El modo de movimiento reducido del sistema acorta la invocación, detiene animaciones y evita el destello. Sin WebGL se conservan la interfaz, las imágenes y el flujo de recompensas, pero no los efectos 3D.
+
+## Importar el ZIP de imágenes en el juego
+
+El botón **Imágenes** admite un ZIP de hasta 250 MiB o imágenes PNG/JPG/WebP. Ofrece hasta 30 imágenes válidas (25 MiB y 8192 px por imagen, hasta 150 MiB descomprimidos), permite revisar qué imagen corresponde a cada personaje y conserva las elegidas en IndexedDB. Las imágenes importadas se usan en miniaturas, colección, revelaciones y resumen. Si hay un VRM disponible, tiene prioridad en el visor 3D.
+
+La importación guarda imágenes solo en ese navegador y origen; no modifica el repositorio. Para distribuirlas con el juego, añade las cinco imágenes a `public/images/` con los nombres indicados arriba. El ZIP adjunto en el chat superó el límite de transferencia de 32 MiB y no pudo extraerse en esta sesión; no se han incluido esas imágenes en Git. No hace falta extraer ni ejecutar otros archivos del ZIP para importarlo en el juego.
